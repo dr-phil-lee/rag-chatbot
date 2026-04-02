@@ -69,11 +69,11 @@ function escapeHtml(input) {
 async function uploadPdf() {
   const file = pdfInput.files[0];
   if (!file) {
-    setStatus("PDF 파일을 먼저 선택하세요", "error");
+    setStatus("Please select a PDF file first.", "error");
     return;
   }
 
-  setStatus("모델 로딩/인덱싱 중... 잠시 기다려 주세요", "loading");
+  setStatus("Loading models and indexing... please wait.", "loading");
   uploadBtn.disabled = true;
 
   const formData = new FormData();
@@ -87,7 +87,7 @@ async function uploadPdf() {
 
     if (!response.ok) {
       const err = await response.json();
-      throw new Error(err.detail || "업로드 실패");
+      throw new Error(err.detail || "Upload failed.");
     }
 
     const data = await response.json();
@@ -96,7 +96,7 @@ async function uploadPdf() {
     questionInput.disabled = false;
     askBtn.disabled = false;
   } catch (error) {
-    setStatus(`오류: ${error.message}`, "error");
+    setStatus(`Error: ${error.message}`, "error");
   } finally {
     uploadBtn.disabled = false;
   }
@@ -106,7 +106,7 @@ async function askQuestion(event) {
   event.preventDefault();
 
   if (!ready) {
-    setStatus("먼저 PDF 업로드가 필요합니다", "error");
+    setStatus("Please upload a PDF first.", "error");
     return;
   }
 
@@ -129,13 +129,13 @@ async function askQuestion(event) {
 
     if (!response.ok) {
       const err = await response.json();
-      throw new Error(err.detail || "질문 처리 실패");
+      throw new Error(err.detail || "Question processing failed.");
     }
 
     const data = await response.json();
     appendAssistantMessage(data.answer, data.refs);
   } catch (error) {
-    appendAssistantMessage(`오류가 발생했습니다: ${error.message}`, []);
+    appendAssistantMessage(`An error occurred: ${error.message}`, []);
   } finally {
     askBtn.disabled = false;
   }
