@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Handbook RAG Chatbot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h2>⚙️ Configuration</h2>
+      <div class="sidebar-section">
+        <label for="pdfInput">PDF 업로드</label>
+        <input id="pdfInput" type="file" accept="application/pdf" />
+        <button id="uploadBtn">업로드 및 인덱싱</button>
+      </div>
+
+      <div class="sidebar-section">
+        <label for="topK">References per answer: <span id="topKValue">3</span></label>
+        <input id="topK" type="range" min="1" max="5" value="3" />
+      </div>
+
+      <div class="sidebar-section inline">
+        <input id="showSnippets" type="checkbox" checked />
+        <label for="showSnippets">Show reference snippets</label>
+      </div>
+
+      <div class="sidebar-section">
+        <button id="clearBtn" class="danger">🗑️ Clear chat history</button>
+      </div>
+
+      <div class="sidebar-footer">
+        Powered by Qwen 2.5 · FAISS · Cross-Encoder
+      </div>
+    </aside>
+
+    <main class="main">
+      <header>
+        <h1>📋 Handbook RAG Chatbot</h1>
+        <p>문서 기반 답변을 생성하고, 근거 참조(Ref)를 함께 보여줍니다.</p>
+        <div id="statusBadge" class="status-badge loading">⬆ PDF를 업로드해 주세요</div>
+      </header>
+
+      <section id="chatArea" class="chat-area"></section>
+
+      <form id="chatForm" class="chat-form">
+        <input id="questionInput" type="text" placeholder="질문을 입력하세요..." disabled />
+        <button id="askBtn" type="submit" disabled>질문하기</button>
+      </form>
+    </main>
+  </div>
+
+  <script src="test.js"></script>
+</body>
+</html>
