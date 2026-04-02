@@ -1,8 +1,8 @@
-const API_BASE = "http://127.0.0.1:8000";
-
 const statusBadge = document.getElementById("statusBadge");
 const pdfInput = document.getElementById("pdfInput");
 const uploadBtn = document.getElementById("uploadBtn");
+const apiBaseInput = document.getElementById("apiBaseInput");
+const saveApiBtn = document.getElementById("saveApiBtn");
 const topKInput = document.getElementById("topK");
 const topKValue = document.getElementById("topKValue");
 const showSnippetsInput = document.getElementById("showSnippets");
@@ -13,6 +13,43 @@ const questionInput = document.getElementById("questionInput");
 const askBtn = document.getElementById("askBtn");
 
 let ready = false;
+const STORAGE_KEY = "ragApiBaseUrl";
+
+function resolveApiBase() {
+  const fromQuery = new URLSearchParams(window.location.search).get("api");
+  if (fromQuery) return fromQuery.replace(/\/$/, "");
+
+  const fromStorage = localStorage.getItem(STORAGE_KEY);
+  if (fromStorage) return fromStorage.replace(/\/$/, "");
+
+  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+    return "http://127.0.0.1:8000";
+  }
+  return window.location.origin;
+}
+
+let API_BASE = resolveApiBase();
+
+function saveApiBase() {
+  const value = apiBaseInput.value.trim();
+  if (!value) {
+    localStorage.removeItem(STORAGE_KEY);
+    API_BASE = resolveApiBase();
+    setStatus(`API URL reset. Current: ${API_BASE}`, "loading");
+    return;
+  }
+
+  localStorage.setItem(STORAGE_KEY, value.replace(/\/$/, ""));
+  API_BASE = resolveApiBase();
+  setStatus(`API URL saved: ${API_BASE}`, "ready");
+}
+
+function describeNetworkError(error) {
+  if (error instanceof TypeError && error.message.includes("Failed to fetch")) {
+    return `Cannot reach API (${API_BASE}). Check backend URL, CORS, and HTTPS.`;
+  }
+  return error.message || "Unknown error.";
+}
 
 function setStatus(message, type = "loading") {
   statusBadge.textContent = message;
@@ -96,7 +133,7 @@ async function uploadPdf() {
     questionInput.disabled = false;
     askBtn.disabled = false;
   } catch (error) {
-    setStatus(`Error: ${error.message}`, "error");
+    setStatus(`Error: ${describeNetworkError(error)}`, "error");
   } finally {
     uploadBtn.disabled = false;
   }
@@ -135,7 +172,7 @@ async function askQuestion(event) {
     const data = await response.json();
     appendAssistantMessage(data.answer, data.refs);
   } catch (error) {
-    appendAssistantMessage(`An error occurred: ${error.message}`, []);
+    appendAssistantMessage(`An error occurred: ${describeNetworkError(error)}`, []);
   } finally {
     askBtn.disabled = false;
   }
@@ -149,6 +186,11 @@ async function clearChat() {
 topKInput.addEventListener("input", () => {
   topKValue.textContent = topKInput.value;
 });
+saveApiBtn.addEventListener("click", saveApiBase);
 uploadBtn.addEventListener("click", uploadPdf);
 chatForm.addEventListener("submit", askQuestion);
 clearBtn.addEventListener("click", clearChat);
+
+if (apiBaseInput) {
+  apiBaseInput.value = API_BASE;
+}
